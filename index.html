@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Asignación automática</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <h1>Asignación automática</h1>
+  
+  <h2>Personas</h2>
+  <textarea id="personasInput" rows="4" cols="50"></textarea>
+  
+  <h2>Elementos</h2>
+  <textarea id="elementosInput" rows="4" cols="50"></textarea>
+  
+  <button id="asignarBtn">Asignar al Azar</button>
+  <button id="limpiarBtn">Limpiar</button>
+  
+  <h2>Asignaciones</h2>
+  <ul id="asignaciones"></ul>
+  
+  <script>
+    $(document).ready(function() {
+      var personasInput = $("#personasInput");
+      var elementosInput = $("#elementosInput");
+      var asignaciones = $("#asignaciones");
+      
+      personasInput.val(localStorage.getItem("personas"));
+      elementosInput.val(localStorage.getItem("elementos"));
+      asignaciones.html(localStorage.getItem("asignaciones"));
+      
+      $("#asignarBtn").click(function() {
+        var personas = personasInput.val().split("\n");
+        var elementos = elementosInput.val().split("\n");
+        
+        asignaciones.empty();
+        
+        elementos.forEach(function(elemento) {
+          var personaIndex = Math.floor(Math.random() * personas.length);
+          var persona = personas[personaIndex];
+          
+          var asignacion = "<li>" + persona + " - " + elemento + "</li>";
+          asignaciones.append(asignacion);
+          
+          personas.splice(personaIndex, 1); // Eliminar la persona asignada para evitar asignaciones duplicadas
+        });
+        
+        localStorage.setItem("personas", personasInput.val());
+        localStorage.setItem("elementos", elementosInput.val());
+        localStorage.setItem("asignaciones", asignaciones.html());
+      });
+      
+      $("#limpiarBtn").click(function() {
+        asignaciones.empty();
+        localStorage.removeItem("asignaciones");
+      });
+    });
+  </script>
+</body>
+</html>
