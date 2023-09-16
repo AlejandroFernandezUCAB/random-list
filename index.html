@@ -19,52 +19,66 @@
   <button id="descargarBtn">Descargar Excel</button>
   
   <h2>Asignaciones</h2>
-  <ul id="asignaciones"></ul>
+  <table id="asignaciones">
+    <thead>
+      <tr>
+        <th>Persona</th>
+        <th>Elemento Asignado</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
   
   <script>
     $(document).ready(function() {
       var personasInput = $("#personasInput");
       var elementosInput = $("#elementosInput");
-      var asignaciones = $("#asignaciones");
+      var tableBody = $("#asignaciones tbody");
       
       personasInput.val(localStorage.getItem("personas"));
       elementosInput.val(localStorage.getItem("elementos"));
-      asignaciones.html(localStorage.getItem("asignaciones"));
+      tableBody.html(localStorage.getItem("asignaciones"));
       
       $("#asignarBtn").click(function() {
         var personas = personasInput.val().split("\n");
         var elementos = elementosInput.val().split("\n");
         
-        asignaciones.empty();
+        tableBody.empty();
         
         elementos.forEach(function(elemento) {
           var personaIndex = Math.floor(Math.random() * personas.length);
           var persona = personas[personaIndex];
           
-          var asignacion = "<li>" + persona + " - " + elemento + "</li>";
-          asignaciones.append(asignacion);
+          var asignacionRow = "<tr><td>" + persona + "</td><td>" + elemento + "</td></tr>";
+          tableBody.append(asignacionRow);
           
           personas.splice(personaIndex, 1); // Eliminar la persona asignada para evitar asignaciones duplicadas
         });
         
         localStorage.setItem("personas", personasInput.val());
         localStorage.setItem("elementos", elementosInput.val());
-        localStorage.setItem("asignaciones", asignaciones.html());
+        localStorage.setItem("asignaciones", tableBody.html());
       });
       
       $("#limpiarBtn").click(function() {
-        asignaciones.empty();
+        tableBody.empty();
         localStorage.removeItem("asignaciones");
       });
       
       $("#descargarBtn").click(function() {
-        var asignacionesArray = [];
-        asignaciones.find("li").each(function() {
-          var asignacion = $(this).text();
-          asignacionesArray.push(asignacion);
+        var personas = [];
+        var elementos = [];
+        
+        tableBody.find("tr").each(function() {
+          var persona = $(this).find("td:first-child").text();
+          var elemento = $(this).find("td:nth-child(2)").text();
+          
+          personas.push(persona);
+          elementos.push(elemento);
         });
         
-        var worksheet = XLSX.utils.json_to_sheet(asignacionesArray);
+        var data = [{ "Personas": personas, "Elementos Asignados": elementos }];
+        var worksheet = XLSX.utils.json_to_sheet(data, { header: ["Personas", "Elementos Asignados"] });
         var workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Asignaciones");
         
