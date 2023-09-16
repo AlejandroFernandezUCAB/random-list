@@ -66,19 +66,16 @@
       });
       
       $("#descargarBtn").click(function() {
-        var personas = [];
-        var elementos = [];
+        var data = [];
         
         tableBody.find("tr").each(function() {
           var persona = $(this).find("td:first-child").text();
           var elemento = $(this).find("td:nth-child(2)").text();
           
-          personas.push(persona);
-          elementos.push(elemento);
+          data.push({ "Persona": persona, "Elemento Asignado": elemento });
         });
         
-        var data = [{ "Personas": personas, "Elementos Asignados": elementos }];
-        var worksheet = XLSX.utils.json_to_sheet(data, { header: ["Personas", "Elementos Asignados"] });
+        var worksheet = XLSX.utils.json_to_sheet(data);
         var workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Asignaciones");
         
