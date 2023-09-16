@@ -4,6 +4,27 @@
   <title>Asignación automática</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+  <style>
+    #loader {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+    }
+    
+    #loader .loader-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-size: 24px;
+    }
+  </style>
 </head>
 <body>
   <h1>Asignación automática</h1>
@@ -13,8 +34,7 @@
   
   <h2>Elementos</h2>
   <textarea id="elementosInput" rows="4" cols="50"></textarea>
-</br>
-</br>
+  
   <button id="asignarBtn">Asignar al Azar</button>
   <button id="limpiarBtn">Limpiar</button>
   <button id="descargarBtn">Descargar Excel</button>
@@ -30,11 +50,16 @@
     <tbody></tbody>
   </table>
   
+  <div id="loader">
+    <div class="loader-text">Cargando...</div>
+  </div>
+  
   <script>
     $(document).ready(function() {
       var personasInput = $("#personasInput");
       var elementosInput = $("#elementosInput");
       var tableBody = $("#asignaciones tbody");
+      var loader = $("#loader");
       
       personasInput.val(localStorage.getItem("personas"));
       elementosInput.val(localStorage.getItem("elementos"));
@@ -45,20 +70,26 @@
         var elementos = elementosInput.val().split("\n");
         
         tableBody.empty();
+        loader.show();
         
-        elementos.forEach(function(elemento) {
-          var personaIndex = Math.floor(Math.random() * personas.length);
-          var persona = personas[personaIndex];
+        setTimeout(function() {
+          elementos.forEach(function(elemento) {
+            var personaIndex = Math.floor(Math.random() * personas.length);
+            var persona = personas[personaIndex];
+            
+            var asignacionRow = "<tr><td>" + persona + "</td><td>" + elemento + "</td></tr>";
+            tableBody.append(asignacionRow);
+            
+            personas.splice(personaIndex, 1); // Eliminar la persona asignada para evitar asignaciones duplicadas
+          });
           
-          var asignacionRow = "<tr><td>" + persona + "</td><td>" + elemento + "</td></tr>";
-          tableBody.append(asignacionRow);
+          localStorage.setItem("personas", personasInput.val());
+          localStorage.setItem("elementos", elementosInput.val());
+          localStorage.setItem("asignaciones", tableBody.html());
           
-          personas.splice(personaIndex, 1); // Eliminar la persona asignada para evitar asignaciones duplicadas
-        });
+          loader.hide();
+        }, 3000); // Tiempo de carga de 3 segundos
         
-        localStorage.setItem("personas", personasInput.val());
-        localStorage.setItem("elementos", elementosInput.val());
-        localStorage.setItem("asignaciones", tableBody.html());
       });
       
       $("#limpiarBtn").click(function() {
