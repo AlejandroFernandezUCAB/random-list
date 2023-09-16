@@ -3,6 +3,7 @@
 <head>
   <title>Asignación automática</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
 </head>
 <body>
   <h1>Asignación automática</h1>
@@ -15,6 +16,7 @@
   
   <button id="asignarBtn">Asignar al Azar</button>
   <button id="limpiarBtn">Limpiar</button>
+  <button id="descargarBtn">Descargar Excel</button>
   
   <h2>Asignaciones</h2>
   <ul id="asignaciones"></ul>
@@ -53,6 +55,23 @@
       $("#limpiarBtn").click(function() {
         asignaciones.empty();
         localStorage.removeItem("asignaciones");
+      });
+      
+      $("#descargarBtn").click(function() {
+        var asignacionesArray = [];
+        asignaciones.find("li").each(function() {
+          var asignacion = $(this).text();
+          asignacionesArray.push(asignacion);
+        });
+        
+        var worksheet = XLSX.utils.json_to_sheet(asignacionesArray);
+        var workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Asignaciones");
+        
+        var fecha = new Date().toISOString().slice(0, 19).replace(/:/g, "-"); // Nombre del archivo basado en la fecha y hora actual
+        var filename = "asignaciones_" + fecha + ".xlsx";
+        
+        XLSX.writeFile(workbook, filename);
       });
     });
   </script>
